@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("firebase-auth")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9765d2a33b7dc0affa5d54e5efc54a8eca1cc0a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ef716019ba5b5364eb4d6ff488c1dd63af586a5e")]
 [assembly: System.Reflection.AssemblyProductAttribute("firebase-auth")]
 [assembly: System.Reflection.AssemblyTitleAttribute("firebase-auth")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

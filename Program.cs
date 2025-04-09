@@ -47,18 +47,15 @@ static void ConfigureServices(WebApplicationBuilder builder)
                 Type = ReferenceType.SecurityScheme
             }
         };
-
         options.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "Firebase Core",
             Version = "v1"
         });
-
         options.AddSecurityDefinition("Bearer", securityScheme);
-
         options.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
-            { securityScheme, new string[] {} }
+            { securityScheme, new string[] { } }
         });
     });
 }

@@ -38,7 +38,7 @@ namespace Firebase_Auth.Context
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
+                .WithMany()
                 .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.SetNull);
 

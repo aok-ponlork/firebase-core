@@ -8,8 +8,6 @@ namespace Firebase_Auth.Data.Entities.Authentication
         [StringLength(50)]
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        // Navigation property for users with this role
-        public virtual ICollection<User> Users { get; set; } = [];
         // For more complex permission systems
         public virtual ICollection<RolePermission> RolePermissions { get; set; } = [];
     }

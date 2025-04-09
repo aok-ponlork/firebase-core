@@ -166,7 +166,7 @@ namespace firebase_auth.Migrations
             modelBuilder.Entity("Firebase_Auth.Data.Entities.Authentication.User", b =>
                 {
                     b.HasOne("Firebase_Auth.Data.Entities.Authentication.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -181,8 +181,6 @@ namespace firebase_auth.Migrations
             modelBuilder.Entity("Firebase_Auth.Data.Entities.Authentication.Role", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,7 +11,7 @@ namespace Firebase_Auth.Data.Models.Authentication
         public string? PhotoUrl { get; set; }
         public Guid? RoleId { get; set; }
         public string? RoleName { get; set; }
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime? LastLoginAt { get; set; }
         public bool IsActive { get; set; }
         public Dictionary<string, object>? AdditionalData { get; set; }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace firebase_auth.Migrations
 {
     [DbContext(typeof(CoreDbContext))]
-    [Migration("20250408091256_initAuthSchema")]
-    partial class initAuthSchema
+    [Migration("20250409032610_initial-migration")]
+    partial class initialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -169,7 +169,7 @@ namespace firebase_auth.Migrations
             modelBuilder.Entity("Firebase_Auth.Data.Entities.Authentication.User", b =>
                 {
                     b.HasOne("Firebase_Auth.Data.Entities.Authentication.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -184,8 +184,6 @@ namespace firebase_auth.Migrations
             modelBuilder.Entity("Firebase_Auth.Data.Entities.Authentication.Role", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

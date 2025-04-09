@@ -25,3 +25,12 @@
 # Windows Installer files
 *.vsix
 *.vsscc
+
+#secret
+Secret/
+appsettings.Development.json
+appsettings.json
+
+# Ignore bin folder
+bin/** */
+obj/** */

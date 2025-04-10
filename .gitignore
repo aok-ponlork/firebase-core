@@ -31,6 +31,6 @@ Secret/
 appsettings.Development.json
 appsettings.json
 
-# Ignore bin folder
-bin/** */
-obj/** */
+bin
+obj
+packages

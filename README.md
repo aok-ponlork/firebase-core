@@ -1,4 +1,4 @@
-# Firebase Authentication Integration with .NET
+# Firebase Authentication Integration with .NET(8)
 
 ## Overview
 
@@ -48,13 +48,18 @@ In the `appsettings.json` file, update the following configurations with your Fi
 }
 ```
 
-### 5. Configure Database
+### 5. Configure Database & Run Migrations
 Ensure you have a PostgreSQL database setup and provide the connection string in `appsettings.json`:
 
 ```json
 "ConnectionStrings": {
     "DefaultConnection": "Host=your_host;Database=your_db;Username=your_user;Password=your_password"
 }
+```
+
+Once the connection string is configured, you'll need to run the Entity Framework migrations to create the necessary tables (e.g., the user table). Run the following command:
+```bash
+dotnet ef database update
 ```
 
 ### 6. Run the Application

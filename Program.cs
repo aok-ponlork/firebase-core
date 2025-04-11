@@ -14,7 +14,6 @@ app.Run();
 static void ConfigureServices(WebApplicationBuilder builder)
 {
     builder.Services.StartEngine(builder.Configuration);
-    builder.Services.AddHttpClient();
     builder.Services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 

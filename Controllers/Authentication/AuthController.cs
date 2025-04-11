@@ -1,5 +1,6 @@
 using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Services.Authentication.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Firebase_Auth.Controllers.Authentication;
@@ -91,6 +92,13 @@ public class AuthController : CoreController
         return ToSuccess("Success", result);
     }
 
+    [Authorize]
+    [HttpGet("test")]
+    public async Task<IActionResult> Test()
+    {
+        await Task.Delay(1000);
+        return ToSuccess("Success");
+    }
     #region Cookie Helper
     private void SetRefreshTokenCookie(string refreshToken)
     {

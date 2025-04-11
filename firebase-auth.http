@@ -1,4 +1,4 @@
-@firebase_auth_HostAddress = http://localhost:5205
+@firebase_auth_HostAddress = http://localhost:5244
 
 GET {{firebase_auth_HostAddress}}/weatherforecast/
 Accept: application/json

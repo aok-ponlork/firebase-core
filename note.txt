@@ -1,0 +1,20 @@
+Creating a new `HttpClient` for each request (as in `using var httpClient = new HttpClient()`) has several significant drawbacks compared to using `HttpClientFactory`:
+
+1. **Socket Exhaustion**: Each `HttpClient` instance creates its own connection pool. When you frequently create and dispose of `HttpClient` objects, you can quickly exhaust available sockets on your system, leading to `SocketException` errors stating that the system is out of socket resources.
+
+2. **DNS Changes**: When you create a new `HttpClient` instance, it caches DNS resolution. If the DNS record for your API changes, a long-lived client won't pick up those changes, but continuously creating new clients doesn't solve this efficiently.
+
+3. **Performance Impact**: Creating a new `HttpClient` for each request adds unnecessary overhead, as establishing connections takes time.
+
+4. **No Connection Pooling Benefits**: You lose the benefits of HTTP connection pooling when continuously creating and disposing of clients.
+
+5. **TLS Handshake Overhead**: Each new client might need to perform a new TLS handshake, adding latency.
+
+Using `HttpClientFactory` (introduced in .NET Core 2.1) addresses these issues by:
+
+- Managing the lifetime of `HttpMessageHandler` instances, which are the underlying components handling connections
+- Implementing a pooling mechanism to reuse connections appropriately
+- Providing a central place to configure policies like retries, timeouts, and circuit breakers
+- Making it easier to add consistent headers, base addresses, or authentication to specific named clients
+
+It's now the recommended approach in .NET for making HTTP requests in production applications, especially in services that make frequent API calls.

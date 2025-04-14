@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project demonstrates how to integrate Firebase Authentication with a .NET backend using JWT token validation, allowing users to securely interact with a .NET API. It uses Firebase Admin SDK for validating Firebase ID tokens, ensuring a seamless authentication process for your application.
+This project shows how to hook up Firebase Authentication with a .NET backend using JWT token validation. Users log in through a .NET route, which talks to Firebase to get an ID token. That token gets verified using the Firebase Admin SDK, and JWT auth is set up in .NET to secure the API routes.
 
 ## Features
 

@@ -1,5 +1,8 @@
+using System.Security.Claims;
 using Firebase_Auth.Data.Models.Authentication.DTO;
+using Firebase_Auth.Data.Models.Authentication.DTO.social;
 using Firebase_Auth.Services.Authentication.Interfaces;
+using Firebase_Auth.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +11,11 @@ namespace Firebase_Auth.Controllers.Authentication;
 public class AuthController : CoreController
 {
     private readonly IAuthService _authService;
-    public AuthController(IAuthService authService, ILogger<AuthController> logger) : base(logger)
+    private readonly ICookieManage _cookieManager;
+    public AuthController(IAuthService authService, ICookieManage cookieManager, ILogger<AuthController> logger) : base(logger)
     {
         _authService = authService;
+        _cookieManager = cookieManager;
     }
     [HttpPost("register")]
     public async Task<IActionResult> RegisterWithEmailAndPasswordAsync([FromBody] RegisterRequest request)
@@ -55,7 +60,7 @@ public class AuthController : CoreController
             //if client is web is good to set refresh token in the cookie instead of res as body
             if (clientType == "web")
             {
-                SetRefreshTokenCookie(result.RefreshToken);
+                _cookieManager.SetRefreshTokenCookie(Response, result.RefreshToken);
                 return ToSuccess("Login success.", result.AccessToken);
             }
 
@@ -77,6 +82,31 @@ public class AuthController : CoreController
         }
     }
 
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        try
+        {
+            //var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userId = User.FindFirst("user_id")?.Value ?? User.FindFirst("sub")?.Value;
+            await _authService.LogoutAsync(userId);
+            var clientType = Request.Headers["X-Client-Type"].ToString();
+            if (clientType == "web")
+            {
+                _cookieManager.DeleteRefreshTokenCookie(Response);
+            }
+            return ToNoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return ToNotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return ToInternalServerError(ex.Message);
+        }
+    }
     [HttpPost("get-user")]
     public async Task<IActionResult> GetUserInfoByTokenId(string idToken)
     {
@@ -84,12 +114,33 @@ public class AuthController : CoreController
         return ToSuccess("Success", result);
     }
 
-
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshTokenAsync(string refreshToken)
     {
         var result = await _authService.RefreshTokenAsync(refreshToken);
         return ToSuccess("Success", result);
+    }
+
+    [HttpPost("social-signin")]
+    public async Task<IActionResult> SocialSignIn([FromBody] SocialSignInRequest request)
+    {
+        try
+        {
+            var result = await _authService.SignWithSocialProvideAsync(request);
+            return Ok(result);
+        }
+        catch (ApplicationException ex)
+        {
+            return ToBadRequest(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ToUnauthorized(ex.Message);
+        }
+        catch (Exception)
+        {
+            return ToInternalServerError("An error occurred during authentication.");
+        }
     }
 
     [Authorize]
@@ -99,18 +150,4 @@ public class AuthController : CoreController
         await Task.Delay(1000);
         return ToSuccess("Success");
     }
-    #region Cookie Helper
-    private void SetRefreshTokenCookie(string refreshToken)
-    {
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
-        };
-        Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-    }
-    #endregion
-
 }

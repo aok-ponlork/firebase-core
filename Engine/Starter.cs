@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Firebase_Auth.Context;
 using Firebase_Auth.Infrastructure.Security;
 using Firebase_Auth.Services.Authentication;
 using Firebase_Auth.Services.Authentication.Interfaces;
+using Firebase_Auth.Services.Interfaces;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
@@ -48,6 +50,7 @@ namespace Firebase_Auth.Engine
             services.AddSingleton<FirebaseJwksManager>();
             services.AddAutoMapper(typeof(Starter));
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICookieManage, CookieManagerService>();
             services.AddHttpClient("httpClient", client => { client.Timeout = TimeSpan.FromSeconds(15); });
         }
         //Register firebase
@@ -97,7 +100,34 @@ namespace Firebase_Auth.Engine
                         {
                             Console.WriteLine($"Authentication failed: {context.Exception}");
                             return Task.CompletedTask;
+                        },
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+
+                            var result = new
+                            {
+                                status = 401,
+                                message = "Unauthorized access!"
+                            };
+
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+
+                            return context.Response.WriteAsync(JsonSerializer.Serialize(result));
                         }
+                        // ,OnTokenValidated = context =>
+                        // {
+                        //     var claims = context.Principal?.Claims;
+                        //     if (claims != null)
+                        //     {
+                        //         foreach (var claim in claims)
+                        //         {
+                        //             Console.WriteLine($"[TokenValidated] Claim: {claim.Type} = {claim.Value}");
+                        //         }
+                        //     }
+                        //     return Task.CompletedTask;
+                        // }
                     };
                 }
             );

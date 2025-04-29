@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Data.Models.Authentication.DTO.social;
 using Firebase_Auth.Services.Authentication.Interfaces;
@@ -24,7 +25,7 @@ public class AuthController : CoreController
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return ToBadRequest(ModelState);
             }
 
             var result = await _authService.RegisterWithEmailAndPasswordAsync(request);
@@ -47,12 +48,11 @@ public class AuthController : CoreController
     [HttpPost("login")]
     public async Task<IActionResult> LoginWithEmailAndPassword([FromBody] LoginRequest request)
     {
-
         try
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return ToBadRequest(ModelState);
             }
             var clientType = Request.Headers["X-Client-Type"].ToString();
             var result = await _authService.LoginWithEmailAndPasswordAsync(request);
@@ -107,11 +107,20 @@ public class AuthController : CoreController
             return ToInternalServerError(ex.Message);
         }
     }
+    [Authorize(Roles = RoleNames.Root)]
     [HttpPost("get-user")]
     public async Task<IActionResult> GetUserInfoByTokenId(string idToken)
     {
-        var result = await _authService.VerifyAndGetUserAsync(idToken);
-        return ToSuccess("Success", result);
+        try
+        {
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var result = await _authService.VerifyAndGetUserAsync(idToken);
+            return ToSuccess("Success", result);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     [HttpPost("refresh")]
@@ -147,7 +156,15 @@ public class AuthController : CoreController
     [HttpGet("test")]
     public async Task<IActionResult> Test()
     {
-        await Task.Delay(1000);
-        return ToSuccess("Success");
+        try
+        {
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            await Task.Delay(1000);
+            return ToSuccess(role ?? "Role is null");
+        }
+        catch (Exception)
+        {
+           return ToInternalServerError("An error occurred during authentication.");
+        }
     }
 }

@@ -25,7 +25,7 @@ public abstract class CoreController : ControllerBase
     });
   }
 
-  protected IActionResult ToCreated(Guid id, string message, object? data = null, string? routeName = null, object? routeValues = null)
+  protected IActionResult ToCreated(string message, object? data = null, string? routeName = null, object? routeValues = null)
   {
     var response = new ApiResponse<object>
     {

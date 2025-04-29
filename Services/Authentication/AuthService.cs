@@ -76,7 +76,7 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
         return new TokenModel(authResult.IdToken, authResult.RefreshToken, authResult.ExpiresIn ?? "", authResult.LocalId ?? "");
     }
 
-    public async Task<string> RegisterWithEmailAndPasswordAsync(RegisterRequest request)
+    public async Task<UserModel> RegisterWithEmailAndPasswordAsync(RegisterRequest request)
     {
         try
         {
@@ -91,7 +91,8 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
             {
                 Email = request.Email,
                 Password = request.Password,
-                DisplayName = request.UserName
+                DisplayName = request.UserName,
+                EmailVerified = false,
             };
 
             UserRecord firebaseUser;
@@ -119,12 +120,18 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
                 IsActive = true,
                 CreatedOn = DateTime.UtcNow,
                 State = EfState.Active,
+                RoleId = Guid.Parse("11111111-1111-1111-1111-111111111111"), // sign as User role
             };
 
             await _context.Users.AddAsync(createUser);
             await _context.SaveChangesAsync();
-
-            return firebaseUid;
+            var claims = new Dictionary<string, object>
+            {
+                { "role", RoleNames.User }
+            };
+            await _firebaseAuth.SetCustomUserClaimsAsync(firebaseUid, claims);
+            var response = _mapper.Map<UserModel>(createUser);
+            return response;
         }
         catch (DbUpdateException ex)
         {
@@ -175,10 +182,15 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
 
             return _mapper.Map<UserModel>(user);
         }
-        catch (FirebaseAuthException ex)
+        catch (FirebaseAuthException)
         {
-            throw new UnauthorizedAccessException($"Invalid token: {ex.Message}");
+            throw new UnauthorizedAccessException();
         }
+        catch (Exception)
+        {
+            throw new Exception();
+        }
+
     }
 
     //Social sign in 
@@ -241,6 +253,16 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
         // Update recode time zone should add + 7 
         user.UpdatedOn = DateTime.UtcNow;
         await _context.SaveChangesAsync();
+    }
+    private async Task SetCustomClaimsAsync(string uid, string role, List<string> permissions)
+    {
+        var claims = new Dictionary<string, object>
+        {
+            { "role", role },
+            { "permissions", permissions }
+        };
+
+        await _firebaseAuth.SetCustomUserClaimsAsync(uid, claims);
     }
     #region Helper
     private async Task<FirebaseAuthResponse> AuthenticateWithFirebaseAsync(string email, string password)
@@ -372,4 +394,8 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
     //     };
     // }
     #endregion
+    public Task SendEmailVerification()
+    {
+        throw new NotImplementedException();
+    }
 }

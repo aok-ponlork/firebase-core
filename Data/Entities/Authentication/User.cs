@@ -20,7 +20,7 @@ namespace Firebase_Auth.Data.Entities.Authentication
         [StringLength(2048)]
         public string? PhotoUrl { get; set; }
         public Guid? RoleId { get; set; }
-        
+
         [ForeignKey("RoleId")]
         public virtual Role? Role { get; set; }
         // Timestamps
@@ -30,7 +30,8 @@ namespace Firebase_Auth.Data.Entities.Authentication
         // Account status
         public bool IsActive { get; set; } = true;
         // Additional properties
-        [Column(TypeName = "jsonb")]
-        public string? AdditionalData { get; set; }
+        [Column(TypeName = "jsonb")] public string? AdditionalData { get; set; }
+        public bool RequirePasswordReset { get; set; } = false;
+        public string? DeviceToken { get; set; } = "";
     }
 }

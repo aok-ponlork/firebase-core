@@ -1,14 +1,39 @@
 using System.Text.Json.Serialization;
 using Firebase_Auth.Engine;
+using Firebase_Auth.Engine.Jwt;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
+// Set up Serilog logging before creating the builder
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/app-log-.txt", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .MinimumLevel.Debug()
+    .CreateLogger();
+
+// Now create the WebApplication builder
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure services
 ConfigureServices(builder);
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
+
+// Build the application
 var app = builder.Build();
+
 // Configure the HTTP request pipeline.
 ConfigurePipeline(app);
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await Starter.SeedRoodUser(services);
+}
 
 app.Run();
 static void ConfigureServices(WebApplicationBuilder builder)
@@ -27,7 +52,15 @@ static void ConfigureServices(WebApplicationBuilder builder)
         fo.MultipartBodyLengthLimit = int.MaxValue; // if don't set default value is: 128 MB
         fo.MultipartHeadersLengthLimit = int.MaxValue;
     });
-
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Default", policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>

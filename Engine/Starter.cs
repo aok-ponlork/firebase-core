@@ -1,6 +1,7 @@
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Engine.Jwt;
+using Firebase_Auth.Helper.Firebase.FCM;
 using Firebase_Auth.Infrastructure.Security;
 using Firebase_Auth.Services;
 using Firebase_Auth.Services.Authentication;
@@ -54,13 +55,14 @@ namespace Firebase_Auth.Engine
         {
             //Jwk Key 
             services.AddSingleton<FirebaseJwksManager>();
+            services.AddScoped<NotificationHelper>();
             services.AddAutoMapper(typeof(Starter));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICookieManage, CookieManagerService>();
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IRolePermissionService, RolePermissionService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddHttpClient("httpClient", client => { client.Timeout = TimeSpan.FromSeconds(15); });
-
             //Jwt 
             services.AddSingleton<JwtAuthConfigurator>();
             // Configure JWT Authentication (after the app is built)

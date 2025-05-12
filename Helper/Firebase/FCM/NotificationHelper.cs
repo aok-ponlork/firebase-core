@@ -11,18 +11,11 @@ public class NotificationHelper
     {
         _notificationManager = notificationService;
     }
-    public async Task SendUserNotificationAsync(NotificationDto model)
+    public async Task SendUserNotificationAsync(NotificationDto model, string deviceToken)
     {
-        string? deviceToken = await _notificationManager.GetUserDeviceTokenByIdAsync(Guid.Parse(model.UserId ?? ""));
-        if (string.IsNullOrEmpty(deviceToken))
-        {
-            Console.WriteLine("User device token is empty.");
-            return;
-        }
-
         var message = new Message
         {
-            Token = "",
+            Token = deviceToken,
             Data = new Dictionary<string, string>
             {
                 { "title", model.Title },

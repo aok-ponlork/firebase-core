@@ -1,5 +1,5 @@
 using Firebase_Auth.Data.Entities.Authentication;
-using Firebase_Auth.Data.Entities.Common;
+using Firebase_Auth.Data.Entities.Common.Notification;
 using Firebase_Auth.Data.Entities.Movies;
 using Firebase_Auth.Data.Seed;
 using Microsoft.EntityFrameworkCore;

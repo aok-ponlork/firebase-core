@@ -9,20 +9,24 @@ using Firebase_Auth.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firebase_Auth.Services;
-internal sealed class MovieService(CoreDbContext context, IMapper mapper, IHttpClientFactory httpClientFactory) : IMovieService
+internal sealed class MovieService(CoreDbContext context, IMapper mapper) : IMovieService
 {
     private readonly CoreDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("httpClient");
     public async Task<MovieCreateDto> CreateMovieAsync(MovieCreateDto movie)
     {
-        var entity = _mapper.Map<Movie>(movie);
-        //Make active state
-        entity.State = EfState.Active;
-        await _context.Movies.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        var result = _mapper.Map<MovieCreateDto>(entity);
-        return result;
+        try
+        {
+            var entity = _mapper.Map<Movie>(movie);
+            entity.State = EfState.Active;
+            await _context.Movies.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return _mapper.Map<MovieCreateDto>(entity);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task DeleteMovieByIdAsync(Guid id)

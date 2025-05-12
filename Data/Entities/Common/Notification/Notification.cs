@@ -1,17 +1,7 @@
-
 using Firebase_Auth.Data.Constant;
-namespace Firebase_Auth.Data.Entities.Common;
+namespace Firebase_Auth.Data.Entities.Common.Notification;
 public class Notification : AuditableEntity
 {
-    public Notification(string title, string message, string? userId, NotificationRecipientType recipientType)
-    {
-        Title = title;
-        Message = message;
-        UserId = userId;
-        NotificationRecipient = recipientType;
-        CreatedOn = DateTime.UtcNow;
-        Status = NotificationStatus.Pending;
-    }
 
     public string Title { get; private set; } = string.Empty;
     public string Message { get; private set; } = string.Empty;

@@ -254,6 +254,7 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
         user.UpdatedOn = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
+    
     private async Task SetCustomClaimsAsync(string uid, string role, List<string> permissions)
     {
         var claims = new Dictionary<string, object>

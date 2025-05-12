@@ -46,18 +46,23 @@ public class NotificationController : CoreController
 
         }
     }
-    [AllowAnonymous]
-    [HttpPost("/push-user-notificaiton")]
-    public async Task<IActionResult> CreateAndPushNotificationToUserByDeviceToken([FromBody] NotificationDto notification)
+    [Authorize(Roles = "admin")]
+    [HttpPost("push-user-notification")]
+    public async Task<IActionResult> CreateAndPushNotificationToUserByDeviceToken([FromBody] SendUserNotificationDto notification)
     {
+        if (string.IsNullOrEmpty(notification.DeviceToken))
+            return ToBadRequest("Device token is required.");
+
         try
         {
-            //await _notificationHelper.SendUserNotificationAsync(notification);
-            return ToSuccess("Notificaiton Pushed.");
+            await _notificationHelper.SendUserNotificationAsync(notification);
+            return ToSuccess("Notification pushed.");
         }
         catch (Exception ex)
         {
+            // Log if needed
             return ToInternalServerError($"An unexpected error occurred: {ex.Message}");
         }
     }
+
 }

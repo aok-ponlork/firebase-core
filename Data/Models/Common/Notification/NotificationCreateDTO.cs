@@ -36,3 +36,14 @@ public class CreateUserNotificationDto : BaseNotificationDto
         RecipientType = recipientType;
     }
 }
+
+public class SendUserNotificationDto : CreateUserNotificationDto
+{
+    public required string DeviceToken { get; set; }
+
+    public SendUserNotificationDto(string title, string message, string userId, NotificationRecipientType recipientType, string deviceToken)
+        : base(title, message, userId, recipientType)
+    {
+        DeviceToken = deviceToken;
+    }
+}

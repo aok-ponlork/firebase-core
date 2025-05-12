@@ -11,17 +11,17 @@ public class NotificationHelper
     {
         _notificationManager = notificationService;
     }
-    public async Task SendUserNotificationAsync(NotificationDto model, string deviceToken)
+    public async Task SendUserNotificationAsync(SendUserNotificationDto model)
     {
         var message = new Message
         {
-            Token = deviceToken,
+            Token = model.DeviceToken,
             Data = new Dictionary<string, string>
             {
                 { "title", model.Title },
                 { "message", model.Message },
                 { "destination", model.Destination ?? "" },
-                { "notificationRecipient", model.NotificationRecipient.ToString() },
+                { "notificationRecipient", model.RecipientType.ToString() },
                 { "imageUrl", model.ImageUrl ?? "" }
             },
             Notification = new Notification

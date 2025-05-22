@@ -11,7 +11,7 @@ public class NotificationHelper
     {
         _notificationManager = notificationService;
     }
-    public async Task SendUserNotificationAsync(SendUserNotificationDto model)
+    public async Task PublishNotificationToUserAsync(SendUserNotificationDto model)
     {
         var message = new Message
         {
@@ -34,19 +34,21 @@ public class NotificationHelper
 
         var result = await FirebaseMessaging.DefaultInstance.SendAsync(message);
         Console.WriteLine($"Successfully sent message: {result}");
+        //Create notification in Database.
+        await _notificationManager.CreateNotificationForSpecificUserAsync(model);
     }
 
-    public async Task SendGeneralNotificationAsync(NotificationDto model)
+    public async Task PublishNotificationToTopicAsync(SendTopicNotificationDto model)
     {
         var message = new Message
         {
-            Topic = "general-notification",
+            Topic = model.Topic,
             Data = new Dictionary<string, string>
             {
                 { "title", model.Title },
                 { "message", model.Message },
                 { "destination", model.Destination ?? "" },
-                { "notificationRecipient", model.NotificationRecipient.ToString() },
+                { "notificationRecipient", model.RecipientType.ToString() },
                 { "imageUrl", model.ImageUrl ?? "" }
             },
             Notification = new Notification
@@ -59,5 +61,7 @@ public class NotificationHelper
 
         var result = await FirebaseMessaging.DefaultInstance.SendAsync(message);
         Console.WriteLine($"Successfully sent general message: {result}");
+        //Create notification in Database.
+        await _notificationManager.CreateGeneralNotificationAsync(model);
     }
 }

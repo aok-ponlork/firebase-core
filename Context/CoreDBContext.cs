@@ -14,6 +14,7 @@ namespace Firebase_Auth.Context
         public virtual DbSet<Permission> Permissions => Set<Permission>();
         public virtual DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public virtual DbSet<Notification> Notifications => Set<Notification>();
+        public virtual DbSet<NotificationTopic> Topics => Set<NotificationTopic>();
         //Other entites
         public virtual DbSet<Movie> Movies => Set<Movie>();
         public CoreDbContext(DbContextOptions contextOption) : base(contextOption)
@@ -55,6 +56,7 @@ namespace Firebase_Auth.Context
             //Seed data
             modelBuilder.SeedMovies();
             modelBuilder.SeedRolesAndPermissions();
+            modelBuilder.SeedNotificationTopics();
         }
     }
 }

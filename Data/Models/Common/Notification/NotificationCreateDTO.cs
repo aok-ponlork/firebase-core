@@ -13,13 +13,11 @@ public abstract class BaseNotificationDto
 
 public class CreateGeneralNotificationDto : BaseNotificationDto
 {
-    public string? UserId { get; set; }
 
-    public CreateGeneralNotificationDto(string title, string message, string? userId, NotificationRecipientType recipientType)
+    public CreateGeneralNotificationDto(string title, string message, NotificationRecipientType recipientType)
     {
         Title = title;
         Message = message;
-        UserId = userId;
         RecipientType = recipientType;
     }
 }
@@ -37,6 +35,7 @@ public class CreateUserNotificationDto : BaseNotificationDto
     }
 }
 
+//dto for user notification req
 public class SendUserNotificationDto : CreateUserNotificationDto
 {
     public required string DeviceToken { get; set; }
@@ -45,5 +44,16 @@ public class SendUserNotificationDto : CreateUserNotificationDto
         : base(title, message, userId, recipientType)
     {
         DeviceToken = deviceToken;
+    }
+}
+//dto for topic notification req
+public class SendTopicNotificationDto : CreateGeneralNotificationDto
+{
+    public required string Topic { get; set; }
+
+    public SendTopicNotificationDto(string title, string message, NotificationRecipientType recipientType, string topic)
+        : base(title, message, recipientType)
+    {
+        Topic = topic;
     }
 }

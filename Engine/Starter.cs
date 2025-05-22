@@ -2,6 +2,8 @@ using Firebase_Auth.Context;
 using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Engine.Jwt;
 using Firebase_Auth.Helper.Firebase.FCM;
+using Firebase_Auth.Infrastructure.MessageQueue.Interface;
+using Firebase_Auth.Infrastructure.MessageQueue.Settings;
 using Firebase_Auth.Infrastructure.Security;
 using Firebase_Auth.Services;
 using Firebase_Auth.Services.Authentication;
@@ -14,6 +16,8 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 
 namespace Firebase_Auth.Engine
 {
@@ -27,6 +31,7 @@ namespace Firebase_Auth.Engine
             });
             services.AddHttpContextAccessor();
             ConfigureDatabase(services, configuration);
+            InitMQSetting(configuration, services);
             RegisterServices(services);
             RolePermissionSetUp(services);
             RegisterFirebaseService(services, configuration);
@@ -62,6 +67,7 @@ namespace Firebase_Auth.Engine
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IRolePermissionService, RolePermissionService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationTopicService, NotificationTopicService>();
             services.AddHttpClient("httpClient", client => { client.Timeout = TimeSpan.FromSeconds(15); });
             //Jwt 
             services.AddSingleton<JwtAuthConfigurator>();
@@ -119,5 +125,17 @@ namespace Firebase_Auth.Engine
                 .AddPolicy("DeleteContent", policy => policy.RequireClaim("permission", "DeleteContent"))
                 .AddPolicy("ViewContent", policy => policy.RequireClaim("permission", "ViewContent"));
         }
+
+        private static void InitMQSetting(ConfigurationManager configuration, IServiceCollection services)
+        {
+            // Keep the existing configuration binding
+            services.Configure<QueueSettings>(configuration.GetSection("RabbitMQSettings"));
+            // Register your consumer and publisher
+            services.AddSingleton<IRabbitConnectionManager, RabbitConnectionManager>();
+            services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
+            services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+            services.AddHostedService<RabbitMqConsumerHostedService>();
+        }
+
     }
 }

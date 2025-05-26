@@ -5,14 +5,19 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Serilog.Events;
 
 // Set up Serilog logging before creating the builder
 Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()  // keep global level at Debug
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)  // raise Microsoft logs to Warning
+    .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore.Server.Kestrel", LogEventLevel.Warning)
     .WriteTo.Console()
     .WriteTo.File("Logs/app-log-.txt", rollingInterval: RollingInterval.Day)
     .Enrich.FromLogContext()
-    .MinimumLevel.Debug()
     .CreateLogger();
+
 
 // Now create the WebApplication builder
 var builder = WebApplication.CreateBuilder(args);
@@ -56,11 +61,13 @@ static void ConfigureServices(WebApplicationBuilder builder)
     {
         options.AddPolicy("Default", policy =>
         {
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            policy.WithOrigins("http://localhost:4200") 
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // Required to send cookies
         });
     });
+
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>

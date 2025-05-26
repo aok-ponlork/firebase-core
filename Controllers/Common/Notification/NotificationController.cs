@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Firebase_Auth.Controllers.Common.Notification;
 [Route("api/notification")]
-[Authorize(Roles = "admin")]
+//[Authorize(Roles = "admin")]
 public class NotificationController : CoreController
 {
     private readonly INotificationService _service;

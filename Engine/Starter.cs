@@ -2,6 +2,8 @@ using Firebase_Auth.Context;
 using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Engine.Jwt;
 using Firebase_Auth.Helper.Firebase.FCM;
+using Firebase_Auth.Infrastructure.Jobs;
+using Firebase_Auth.Infrastructure.MessageQueue;
 using Firebase_Auth.Infrastructure.MessageQueue.Interface;
 using Firebase_Auth.Infrastructure.MessageQueue.Settings;
 using Firebase_Auth.Infrastructure.Security;
@@ -16,8 +18,7 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
+
 
 namespace Firebase_Auth.Engine
 {
@@ -31,10 +32,10 @@ namespace Firebase_Auth.Engine
             });
             services.AddHttpContextAccessor();
             ConfigureDatabase(services, configuration);
-            InitMQSetting(configuration, services);
             RegisterServices(services);
             RolePermissionSetUp(services);
             RegisterFirebaseService(services, configuration);
+            InitMQSetting(configuration, services);
         }
         //Database configuration method
         private static void ConfigureDatabase(IServiceCollection services, ConfigurationManager configuration)
@@ -134,7 +135,10 @@ namespace Firebase_Auth.Engine
             services.AddSingleton<IRabbitConnectionManager, RabbitConnectionManager>();
             services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
             services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
-            services.AddHostedService<RabbitMqConsumerHostedService>();
+            //Hosted service listener
+            //services.AddHostedService<RabbitMqConsumerHostedService>();
+            //Nofitication Consumer
+            services.AddHostedService<NotificationConsumerService>();
         }
 
     }

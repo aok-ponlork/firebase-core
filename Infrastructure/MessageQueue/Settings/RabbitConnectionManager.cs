@@ -1,7 +1,7 @@
 using Firebase_Auth.Infrastructure.MessageQueue.Interface;
-using Firebase_Auth.Infrastructure.MessageQueue.Settings;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+namespace Firebase_Auth.Infrastructure.MessageQueue.Settings;
 
 public class RabbitConnectionManager(IOptions<QueueSettings> options) : IRabbitConnectionManager
 {

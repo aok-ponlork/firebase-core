@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Firebase_Auth.Controllers.Authentication;
+
 [Route("api/auth")]
 public class AuthController : CoreController
 {
@@ -61,7 +62,14 @@ public class AuthController : CoreController
             if (clientType == "web")
             {
                 _cookieManager.SetRefreshTokenCookie(Response, result.RefreshToken);
-                return ToSuccess("Login success.", result.AccessToken);
+                var response = new
+                {
+                    result.AccessToken,
+                    result.ExpiresIn,
+                    result.Uid
+                };
+
+                return ToSuccess("Login success.", response);
             }
 
             //if client != web then we can res with refreshToken, Ex: Mobile ...
@@ -164,7 +172,7 @@ public class AuthController : CoreController
         }
         catch (Exception)
         {
-           return ToInternalServerError("An error occurred during authentication.");
+            return ToInternalServerError("An error occurred during authentication.");
         }
     }
 }

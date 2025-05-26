@@ -13,10 +13,12 @@ public class NotificationHelper
     }
     public async Task PublishNotificationToUserAsync(SendUserNotificationDto model)
     {
-        var message = new Message
+        try
         {
-            Token = model.DeviceToken,
-            Data = new Dictionary<string, string>
+            var message = new Message
+            {
+                Token = model.DeviceToken,
+                Data = new Dictionary<string, string>
             {
                 { "title", model.Title },
                 { "message", model.Message },
@@ -24,18 +26,24 @@ public class NotificationHelper
                 { "notificationRecipient", model.RecipientType.ToString() },
                 { "imageUrl", model.ImageUrl ?? "" }
             },
-            Notification = new Notification
-            {
-                Title = model.Title,
-                Body = model.Message,
-                ImageUrl = model.ImageUrl
-            }
-        };
+                Notification = new Notification
+                {
+                    Title = model.Title,
+                    Body = model.Message,
+                    ImageUrl = model.ImageUrl
+                }
+            };
 
-        var result = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-        Console.WriteLine($"Successfully sent message: {result}");
-        //Create notification in Database.
-        await _notificationManager.CreateNotificationForSpecificUserAsync(model);
+            var result = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            Console.WriteLine($"Successfully sent message: {result}");
+            //Create notification in Database.
+            await _notificationManager.CreateNotificationForSpecificUserAsync(model);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine(ex.Message);
+            throw;
+        }
     }
 
     public async Task PublishNotificationToTopicAsync(SendTopicNotificationDto model)

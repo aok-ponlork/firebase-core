@@ -2,6 +2,7 @@ using Firebase_Auth.Infrastructure.MessageQueue.Interface;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+namespace Firebase_Auth.Infrastructure.MessageQueue;
 
 public class RabbitMqConsumer : IRabbitMqConsumer
 {
@@ -10,7 +11,8 @@ public class RabbitMqConsumer : IRabbitMqConsumer
     {
         _connectionManager = connection;
     }
-    public async Task ConsumeAsync(string queueName, Action<string> onMessageReceived)
+    public async Task ConsumeAsync(string queueName, Func<string, Task> onMessageReceived)
+
     {
         var connection = await _connectionManager.GetConnectionAsync();
         if (connection == null || !connection.IsOpen)
@@ -25,7 +27,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         {
             var body = args.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
-            onMessageReceived(message);
+            _ = onMessageReceived(message);
             await Task.CompletedTask;
         };
         await channel.BasicConsumeAsync(queue: queueName, autoAck: true, consumer: consumer);

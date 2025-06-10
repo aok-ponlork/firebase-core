@@ -1,5 +1,5 @@
 using AutoMapper;
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Movies;
@@ -45,7 +45,7 @@ internal sealed class MovieService(CoreDbContext context, IMapper mapper) : IMov
         return result;
     }
 
-    public async Task<PaginationResponse<MovieListDto>> ListMovieAsync(PaginationFilter filter)
+    public async Task<PaginationResponse<MovieListDto>> ListMovieAsync(FilterRequest filter)
     {
         // based query
         var entityQuery = _context.Movies

@@ -1,4 +1,4 @@
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Services.Authorization.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +16,7 @@ public class PermissionController : CoreController
     }
     [Authorize(Roles = RoleNames.Admin)]
     [HttpGet]
-    public async Task<IActionResult> ListAllRoleAsync([FromQuery] PaginationFilter filter)
+    public async Task<IActionResult> ListAllRoleAsync([FromQuery] FilterRequest filter)
     {
         var result = await _service.GetAllPermissionsAsync(filter);
         return ToSuccess("Listed Permission.", result);

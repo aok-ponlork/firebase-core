@@ -15,6 +15,7 @@ using FirebaseAdmin.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firebase_Auth.Services.Authentication;
+
 internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext context, IMapper mapper, IConfiguration configuration, IHttpClientFactory httpClientFactory) : IAuthService
 {
     private readonly FirebaseAuth _firebaseAuth = firebaseAuth;
@@ -48,6 +49,10 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
 
     public async Task<TokenModel> RefreshTokenAsync(string refreshToken)
     {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            throw new UnauthorizedAccessException("Refresh token is missing.");
+        }
         var authUrl = _configuration["Firebase:RefreshTokenUri"];
 
         var content = new StringContent(
@@ -254,7 +259,7 @@ internal sealed class AuthService(FirebaseAuth firebaseAuth, CoreDbContext conte
         user.UpdatedOn = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
-    
+
     private async Task SetCustomClaimsAsync(string uid, string role, List<string> permissions)
     {
         var claims = new Dictionary<string, object>

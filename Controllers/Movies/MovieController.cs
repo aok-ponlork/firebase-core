@@ -1,11 +1,13 @@
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Models.Movies;
 using Firebase_Auth.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Firebase_Auth.Controllers.Movies;
-[Route("api/movie")]
+
+[Route("api/movies")]
 [Authorize]
 public class MovieController : CoreController
 {
@@ -16,10 +18,21 @@ public class MovieController : CoreController
     }
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> ListMovieAsync([FromQuery] PaginationFilter filter)
+    public async Task<IActionResult> ListMovieAsync([FromQuery] FilterRequest filter)
     {
-        var movies = await _movieService.ListMovieAsync(filter);
-        return ToSuccess("Success get movies list!", movies);
+
+        try
+        {
+            Console.WriteLine($"Filters count: {filter.Filters?.Count ?? 0}");
+            Console.WriteLine($"SortBy: {filter.SortBy}");
+            Console.WriteLine($"Filters JSON: {JsonConvert.SerializeObject(filter.Filters)}");
+            var movies = await _movieService.ListMovieAsync(filter);
+            return ToSuccess("Success get movies list!", movies);
+        }
+        catch (Exception ex)
+        {
+            return ToInternalServerError($"An unexpected error occurred: {ex.Message}");
+        }
     }
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMovieByIdAsync(string id)

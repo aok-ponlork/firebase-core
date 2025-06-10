@@ -1,5 +1,5 @@
 using AutoMapper;
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Common.Notification;
@@ -9,6 +9,7 @@ using Firebase_Auth.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firebase_Auth.Services;
+
 internal sealed class NotificationService : INotificationService
 {
     private readonly CoreDbContext _context;
@@ -61,7 +62,7 @@ internal sealed class NotificationService : INotificationService
         return notification;
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(PaginationFilter filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(FilterRequest  filter)
     {
         var entityQuery = _context.Notifications
             .Where(m => m.State != EfState.Deleted)
@@ -78,7 +79,7 @@ internal sealed class NotificationService : INotificationService
         };
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(PaginationFilter filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(FilterRequest filter)
     {
         var entityQuery = _context.Notifications
             .Where(m => m.State != EfState.Deleted && m.NotificationRecipient == NotificationRecipientType.General)
@@ -104,7 +105,7 @@ internal sealed class NotificationService : INotificationService
         return fcmToken;
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(PaginationFilter filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(FilterRequest  filter)
     {
         var entityQuery = _context.Notifications
            .Where(m => m.State != EfState.Deleted && m.NotificationRecipient == NotificationRecipientType.SpecificUser)

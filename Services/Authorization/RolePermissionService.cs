@@ -1,5 +1,5 @@
 using AutoMapper;
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Authentication;
@@ -23,7 +23,7 @@ internal sealed class RolePermissionService : IRolePermissionService
     }
 
     #region Role
-    public async Task<PaginationResponse<RoleDto>> GetAllRolesAsync(PaginationFilter filter)
+    public async Task<PaginationResponse<RoleDto>> GetAllRolesAsync(FilterRequest  filter)
     {
         var entityQuery = _context.Roles.Where(m => m.State != EfState.Deleted).AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
@@ -198,7 +198,7 @@ internal sealed class RolePermissionService : IRolePermissionService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<PaginationResponse<PermissionDto>> GetAllPermissionsAsync(PaginationFilter filter)
+    public async Task<PaginationResponse<PermissionDto>> GetAllPermissionsAsync(FilterRequest  filter)
     {
         var entites = _context.Permissions.Where(p => p.State != EfState.Deleted);
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entites, filter);

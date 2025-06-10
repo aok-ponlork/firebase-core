@@ -1,4 +1,4 @@
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Models.Common.Notification;
 using Firebase_Auth.Helper.Firebase.FCM;
 using Firebase_Auth.Services.Interfaces;
@@ -32,7 +32,7 @@ public class NotificationTopicController : CoreController
         }
     }
     [HttpGet]
-    public async Task<IActionResult> ListAsync([FromQuery] PaginationFilter filter)
+    public async Task<IActionResult> ListAsync([FromQuery] FilterRequest filter)
     {
         try
         {

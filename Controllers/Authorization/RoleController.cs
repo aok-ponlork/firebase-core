@@ -1,4 +1,4 @@
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Models.Authorization;
 using Firebase_Auth.Services.Authorization.Interfaces;
@@ -16,7 +16,7 @@ public class RoleController : CoreController
         _service = service;
     }
     [HttpGet]
-    public async Task<IActionResult> ListAllRoleAsync([FromQuery] PaginationFilter filter)
+    public async Task<IActionResult> ListAllRoleAsync([FromQuery] FilterRequest filter)
     {
         var result = await _service.GetAllRolesAsync(filter);
         return ToSuccess("Listed Roles.", result);

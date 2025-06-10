@@ -1,6 +1,6 @@
 
 using AutoMapper;
-using Firebase_Auth.Common;
+using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Common.Notification;
@@ -42,7 +42,7 @@ internal sealed class NotificationTopicService : INotificationTopicService
         return _mapper.Map<NotificationTopicDto>(record);
     }
 
-    public async Task<PaginationResponse<NotificationTopicDto>> List(PaginationFilter filter)
+    public async Task<PaginationResponse<NotificationTopicDto>> List(FilterRequest filter)
     {
         var entityQuery = _context.Topics
             .Where(m => m.State != EfState.Deleted)

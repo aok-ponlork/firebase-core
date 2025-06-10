@@ -115,7 +115,7 @@ public class AuthController : CoreController
             return ToInternalServerError(ex.Message);
         }
     }
-    [Authorize(Roles = RoleNames.Root)]
+    [Authorize]
     [HttpPost("get-user")]
     public async Task<IActionResult> GetUserInfoByTokenId(string idToken)
     {
@@ -132,10 +132,45 @@ public class AuthController : CoreController
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> RefreshTokenAsync(string refreshToken)
+    public async Task<IActionResult> RefreshTokenAsync([FromBody] string refreshToken)
     {
-        var result = await _authService.RefreshTokenAsync(refreshToken);
-        return ToSuccess("Success", result);
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return ToBadRequest(ModelState);
+            }
+            var clientType = Request.Headers["X-Client-Type"].ToString();
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+
+            //if client is web is good to set refresh token in the cookie instead of res as body
+            if (clientType == "web")
+            {
+                _cookieManager.SetRefreshTokenCookie(Response, result.RefreshToken);
+                var response = new
+                {
+                    result.AccessToken,
+                    result.ExpiresIn,
+                    result.Uid
+                };
+                return ToSuccess("Refresh token success.", response);
+            }
+            //if client != web then we can res with refreshToken, Ex: Mobile ...
+            return ToSuccess("Refresh token success.", result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return ToNotFound(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ToUnauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during user refresh token");
+            return ToInternalServerError($"An unexpected error occurred during refresh token. Please try again later. :  {ex.Message}");
+        }
     }
 
     [HttpPost("social-signin")]

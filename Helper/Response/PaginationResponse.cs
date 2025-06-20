@@ -1,4 +1,4 @@
-
+namespace Firebase_Auth.Helper.Response;
 
 public class PaginationResponse<T> where T : class
 {

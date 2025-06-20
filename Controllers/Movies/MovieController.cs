@@ -24,7 +24,6 @@ public class MovieController : CoreController
         try
         {
             Console.WriteLine($"Filters count: {filter.Filters?.Count ?? 0}");
-            Console.WriteLine($"SortBy: {filter.SortBy}");
             Console.WriteLine($"Filters JSON: {JsonConvert.SerializeObject(filter.Filters)}");
             var movies = await _movieService.ListMovieAsync(filter);
             return ToSuccess("Success get movies list!", movies);

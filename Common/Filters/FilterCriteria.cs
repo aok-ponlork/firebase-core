@@ -18,7 +18,7 @@ public class FilterRequest : PaginationFilter
 {
     [ModelBinder(BinderType = typeof(JsonQueryModelBinder))]
     [FromQuery(Name = "filters")]
-    public List<DynamicFilter> Filters { get; set; } = new();
+    public List<DynamicFilter> Filters { get; set; } = [];
     [FromQuery(Name = "sortBy")]
     public string? SortBy { get; set; }
 

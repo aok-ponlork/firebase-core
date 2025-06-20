@@ -7,11 +7,7 @@ public static class PaginationHelper
 {
     public static async Task<PaginationResponse<T>> CreatePaginatedResponse<T>(IQueryable<T> query, FilterRequest filter) where T : class
     {
-        var combinedFilter = new DynamicFilter
-        {
-            Filters = filter.Filters
-        };
-
+        var combinedFilter = BuildNestedFilter(filter.Filters);
         query = query.ApplyFilters(combinedFilter);
 
         // sorting
@@ -33,5 +29,24 @@ public static class PaginationHelper
             Data = data
         };
     }
+    static DynamicFilter BuildNestedFilter(List<DynamicFilter> filters)
+    {
+        if (filters == null || filters.Count == 0)
+            return new DynamicFilter { Logic = "AND", Filters = new List<DynamicFilter>() };
 
+        // Start from the last filter
+        DynamicFilter nestedFilter = filters.Last();
+
+        // Walk backward, nesting each previous filter with the next, using that filter's logic or default AND
+        for (int i = filters.Count - 2; i >= 0; i--)
+        {
+            nestedFilter = new DynamicFilter
+            {
+                Logic = filters[i].Logic?.ToUpper() ?? "AND",
+                Filters = new List<DynamicFilter> { filters[i], nestedFilter }
+            };
+        }
+
+        return nestedFilter;
+    }
 }

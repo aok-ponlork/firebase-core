@@ -1,5 +1,6 @@
 using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Models.Authorization;
+using Firebase_Auth.Helper.Response;
 
 namespace Firebase_Auth.Services.Authorization.Interfaces;
 public interface IRolePermissionService

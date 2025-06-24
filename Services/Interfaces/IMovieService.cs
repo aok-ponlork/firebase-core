@@ -1,5 +1,6 @@
 using Firebase_Auth.Common.Filters;
 using Firebase_Auth.Data.Models.Movies;
+using Firebase_Auth.Helper.Response;
 
 namespace Firebase_Auth.Services.Interfaces;
 public interface IMovieService

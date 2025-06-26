@@ -18,7 +18,7 @@ public static class PaginationHelper
         // pagination
         var data = await query
             .Skip((filter.PageIndex - 1) * filter.PageSize)
-            .Take(filter.PageSize).OrderDescending()
+            .Take(filter.PageSize)
             .ToListAsync();
 
         return new PaginationResponse<T>

@@ -18,7 +18,7 @@ public static class PaginationHelper
         // pagination
         var data = await query
             .Skip((filter.PageIndex - 1) * filter.PageSize)
-            .Take(filter.PageSize)
+            .Take(filter.PageSize).OrderDescending()
             .ToListAsync();
 
         return new PaginationResponse<T>
@@ -33,10 +33,8 @@ public static class PaginationHelper
     {
         if (filters == null || filters.Count == 0)
             return new DynamicFilter { Logic = "AND", Filters = new List<DynamicFilter>() };
-
         // Start from the last filter
         DynamicFilter nestedFilter = filters.Last();
-
         // Walk backward, nesting each previous filter with the next, using that filter's logic or default AND
         for (int i = filters.Count - 2; i >= 0; i--)
         {
@@ -46,7 +44,6 @@ public static class PaginationHelper
                 Filters = new List<DynamicFilter> { filters[i], nestedFilter }
             };
         }
-
         return nestedFilter;
     }
 }

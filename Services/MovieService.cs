@@ -9,6 +9,7 @@ using Firebase_Auth.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firebase_Auth.Services;
+
 internal sealed class MovieService(CoreDbContext context, IMapper mapper) : IMovieService
 {
     private readonly CoreDbContext _context = context;
@@ -51,6 +52,13 @@ internal sealed class MovieService(CoreDbContext context, IMapper mapper) : IMov
         var entityQuery = _context.Movies
             .Where(m => m.State != EfState.Deleted)
             .AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            entityQuery = entityQuery.Where(m =>
+                EF.Functions.ToTsVector("english", m.Title + " " + m.Description)
+                .Matches(EF.Functions.WebSearchToTsQuery("english", filter.Search))
+            );
+        }
         // Use the helper to handle pagination of entities
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
         //Map data

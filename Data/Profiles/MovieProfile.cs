@@ -13,6 +13,7 @@ public class MovieProfile : Profile
         // From entity to DTO
         CreateMap<Movie, MovieGetDto>();
         CreateMap<Movie, MovieListDto>();
+        CreateMap<Movie, MovieCreateDto>();
 
         // From DTO to entity (for creating and updating)
         CreateMap<MovieCreateDto, Movie>();

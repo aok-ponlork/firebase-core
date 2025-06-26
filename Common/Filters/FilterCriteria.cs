@@ -21,9 +21,10 @@ public class FilterRequest : PaginationFilter
     public List<DynamicFilter> Filters { get; set; } = [];
     [FromQuery(Name = "sortBy")]
     public string? SortBy { get; set; }
-
     [FromQuery(Name = "sortDirection")]
     public string SortDirection { get; set; } = "ASC"; // ASC or DESC
+    [FromQuery(Name = "search")]
+    public string? Search { get; set; }
 }
 
 

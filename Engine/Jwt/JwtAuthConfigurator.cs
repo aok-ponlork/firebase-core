@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Firebase_Auth.Engine.Jwt;
+
 public class JwtAuthConfigurator
 {
     private readonly ILogger<JwtAuthConfigurator> _logger;
@@ -86,12 +87,21 @@ public class JwtAuthConfigurator
     {
         response.StatusCode = statusCode;
         response.ContentType = "application/json";
-        return response.WriteAsync(JsonSerializer.Serialize(new ApiResponse<T>
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        var responseBody = new ApiResponse<T>
         {
             Success = false,
             StatusCode = statusCode,
             Message = message,
             Errors = errors
-        }));
+        };
+
+        return response.WriteAsync(JsonSerializer.Serialize(responseBody, options));
     }
+
 }

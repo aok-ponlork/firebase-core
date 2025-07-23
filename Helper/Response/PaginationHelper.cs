@@ -26,7 +26,7 @@ public static class PaginationHelper
             PageNumber = filter.PageIndex,
             PageSize = filter.PageSize,
             TotalRecords = totalRecords,
-            Data = data
+            Datasource = data
         };
     }
     static DynamicFilter BuildNestedFilter(List<DynamicFilter> filters)

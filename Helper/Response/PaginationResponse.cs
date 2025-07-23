@@ -10,6 +10,6 @@ public class PaginationResponse<T> where T : class
          : 1;
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
-    public List<T> Data { get; set; } = [];
+    public List<T> Datasource { get; set; } = [];
 }
 

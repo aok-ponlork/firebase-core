@@ -27,13 +27,13 @@ internal sealed class RolePermissionService : IRolePermissionService
     {
         var entityQuery = _context.Roles.Where(m => m.State != EfState.Deleted).AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
-        var roles = _mapper.Map<List<RoleDto>>(entityResult.Data);
+        var roles = _mapper.Map<List<RoleDto>>(entityResult.Datasource);
         return new PaginationResponse<RoleDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = roles
+            Datasource = roles
         };
     }
 
@@ -202,13 +202,13 @@ internal sealed class RolePermissionService : IRolePermissionService
     {
         var entites = _context.Permissions.Where(p => p.State != EfState.Deleted);
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entites, filter);
-        var roles = _mapper.Map<List<PermissionDto>>(entityResult.Data);
+        var roles = _mapper.Map<List<PermissionDto>>(entityResult.Datasource);
         return new PaginationResponse<PermissionDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = roles
+            Datasource = roles
         };
 
     }

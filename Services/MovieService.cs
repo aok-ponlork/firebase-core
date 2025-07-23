@@ -62,13 +62,13 @@ internal sealed class MovieService(CoreDbContext context, IMapper mapper) : IMov
         // Use the helper to handle pagination of entities
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
         //Map data
-        var data = _mapper.Map<List<MovieListDto>>(entityResult.Data);
+        var data = _mapper.Map<List<MovieListDto>>(entityResult.Datasource);
         return new PaginationResponse<MovieListDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = data
+            Datasource = data
         };
     }
 

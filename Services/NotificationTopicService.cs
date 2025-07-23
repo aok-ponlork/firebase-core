@@ -49,13 +49,13 @@ internal sealed class NotificationTopicService : INotificationTopicService
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
-        var data = _mapper.Map<List<NotificationTopicDto>>(entityResult.Data);
+        var data = _mapper.Map<List<NotificationTopicDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationTopicDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = data
+            Datasource = data
         };
     }
 

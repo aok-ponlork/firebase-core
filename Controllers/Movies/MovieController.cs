@@ -50,6 +50,7 @@ public class MovieController : CoreController
             return ToInternalServerError($"An unexpected error occurred: {ex.Message}");
         }
     }
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateMovieAsync([FromBody] MovieCreateDto req)
     {

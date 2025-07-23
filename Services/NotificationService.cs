@@ -69,13 +69,13 @@ internal sealed class NotificationService : INotificationService
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
-        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Data);
+        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = data
+            Datasource = data
         };
     }
 
@@ -86,13 +86,13 @@ internal sealed class NotificationService : INotificationService
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
-        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Data);
+        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = data
+            Datasource = data
         };
     }
 
@@ -112,13 +112,13 @@ internal sealed class NotificationService : INotificationService
            .OrderByDescending(m => m.CreatedOn)
            .AsNoTracking();
         var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
-        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Data);
+        var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {
             PageNumber = entityResult.PageNumber,
             PageSize = entityResult.PageSize,
             TotalRecords = entityResult.TotalRecords,
-            Data = data
+            Datasource = data
         };
     }
 

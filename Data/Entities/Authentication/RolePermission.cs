@@ -18,6 +18,7 @@ namespace Firebase_Auth.Data.Entities.Authentication
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
         public string? Description { get; set; }
         public virtual ICollection<RolePermission> RolePermissions { get; set; } = [];
     }

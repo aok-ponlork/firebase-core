@@ -1,14 +1,22 @@
 using Firebase_Auth.Data.Entities.Authentication;
+using Firebase_Auth.Data.Entities.Common.Notification;
+using Firebase_Auth.Data.Entities.Movies;
+using Firebase_Auth.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firebase_Auth.Context
 {
     public class CoreDbContext : DbContext
     {
+        //User and role permission.
         public virtual DbSet<User> Users => Set<User>();
         public virtual DbSet<Role> Roles => Set<Role>();
         public virtual DbSet<Permission> Permissions => Set<Permission>();
         public virtual DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+        public virtual DbSet<Notification> Notifications => Set<Notification>();
+        public virtual DbSet<NotificationTopic> Topics => Set<NotificationTopic>();
+        //Other entites
+        public virtual DbSet<Movie> Movies => Set<Movie>();
         public CoreDbContext(DbContextOptions contextOption) : base(contextOption)
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -17,6 +25,7 @@ namespace Firebase_Auth.Context
         {
             base.OnModelCreating(modelBuilder);
 
+            //User & Role permission.
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.FirebaseUid)
                 .IsUnique();
@@ -42,6 +51,12 @@ namespace Firebase_Auth.Context
                 .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            //Other entites.
+
+            //Seed data
+            modelBuilder.SeedMovies();
+            modelBuilder.SeedRolesAndPermissions();
+            modelBuilder.SeedNotificationTopics();
         }
     }
 }

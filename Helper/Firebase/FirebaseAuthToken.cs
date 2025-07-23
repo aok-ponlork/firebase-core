@@ -12,10 +12,10 @@ public class FirebaseAuthResponse
     public required string RefreshToken { get; set; } = "";
 
     [JsonPropertyName("expiresIn")]
-    public string? ExpiresIn { get; set; }
+    public required string ExpiresIn { get; set; }
 
     [JsonPropertyName("localId")]
-    public string? LocalId { get; set; }
+    public required string LocalId { get; set; }
 }
 
 public class FirebaseRefreshTokenResponse

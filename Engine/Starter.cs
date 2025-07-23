@@ -1,13 +1,24 @@
 using Firebase_Auth.Context;
+using Firebase_Auth.Data.Models.Authentication.DTO;
+using Firebase_Auth.Engine.Jwt;
+using Firebase_Auth.Helper.Firebase.FCM;
+using Firebase_Auth.Infrastructure.Jobs;
+using Firebase_Auth.Infrastructure.MessageQueue;
+using Firebase_Auth.Infrastructure.MessageQueue.Interface;
+using Firebase_Auth.Infrastructure.MessageQueue.Settings;
 using Firebase_Auth.Infrastructure.Security;
+using Firebase_Auth.Services;
 using Firebase_Auth.Services.Authentication;
 using Firebase_Auth.Services.Authentication.Interfaces;
+using Firebase_Auth.Services.Authorization.Interfaces;
+using Firebase_Auth.Services.Interfaces;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
+using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
 
 namespace Firebase_Auth.Engine
 {
@@ -15,12 +26,16 @@ namespace Firebase_Auth.Engine
     {
         public static void StartEngine(this IServiceCollection services, ConfigurationManager configuration)
         {
-            services.AddControllers();
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
             services.AddHttpContextAccessor();
             ConfigureDatabase(services, configuration);
             RegisterServices(services);
+            RolePermissionSetUp(services);
             RegisterFirebaseService(services, configuration);
-            JwtConfiguration(services, configuration);
+            InitMQSetting(configuration, services);
         }
         //Database configuration method
         private static void ConfigureDatabase(IServiceCollection services, ConfigurationManager configuration)
@@ -36,7 +51,7 @@ namespace Firebase_Auth.Engine
                         maxRetryDelay: TimeSpan.FromSeconds(10),
                         errorCodesToAdd: null
                     );
-                });
+                }).ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             }, poolSize: 4);
 
             services.AddScoped(p => p.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContext());
@@ -46,9 +61,20 @@ namespace Firebase_Auth.Engine
         {
             //Jwk Key 
             services.AddSingleton<FirebaseJwksManager>();
+            services.AddScoped<NotificationHelper>();
             services.AddAutoMapper(typeof(Starter));
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICookieManage, CookieManagerService>();
+            services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IRolePermissionService, RolePermissionService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationTopicService, NotificationTopicService>();
             services.AddHttpClient("httpClient", client => { client.Timeout = TimeSpan.FromSeconds(15); });
+            //Jwt 
+            services.AddSingleton<JwtAuthConfigurator>();
+            // Configure JWT Authentication (after the app is built)
+            var jwtConfigurator = services.BuildServiceProvider().GetRequiredService<JwtAuthConfigurator>();
+            jwtConfigurator.Configure(services);
         }
         //Register firebase
         private static void RegisterFirebaseService(IServiceCollection services, ConfigurationManager configuration)
@@ -62,45 +88,57 @@ namespace Firebase_Auth.Engine
                 });
             }
             services.AddSingleton(FirebaseAuth.DefaultInstance);
+            services.AddSingleton(FirebaseMessaging.DefaultInstance);
         }
-        //Set up JWT 
-        private static void JwtConfiguration(IServiceCollection services, ConfigurationManager configuration)
+
+        public static async Task SeedRoodUser(IServiceProvider services)
         {
-            var projectId = configuration["Firebase:ProjectId"];
-            var issuer = $"https://securetoken.google.com/{projectId}";
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            try
+            {
+                var userManager = services.GetRequiredService<IAuthService>();
+                var roleManager = services.GetRequiredService<IRolePermissionService>();
+                var config = services.GetRequiredService<IConfiguration>();
+                // Get the RootUser section from appsettings
+                var rootUserConfig = config.GetSection("RootUser");
+                var registerRequest = new RegisterRequest
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = issuer,
-                        ValidateAudience = true,
-                        ValidAudience = projectId,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.Zero,
-                    };
+                    Email = rootUserConfig["Email"]!,
+                    Password = rootUserConfig["Password"]!,
+                    UserName = rootUserConfig["UserName"]!
+                };
+                var user = await userManager.RegisterWithEmailAndPasswordAsync(registerRequest);
+                await roleManager.AssignRoleToUserAsync((Guid)user.Id!, Guid.Parse("99999999-9999-9999-9999-999999999999"));
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
 
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = async context =>
-                        {
-                            // Get the FirebaseJwksManager from the service provider
-                            var jwksManager = context.HttpContext.RequestServices.GetRequiredService<FirebaseJwksManager>();
-                            // Set the signing keys
-                            context.Options.TokenValidationParameters.IssuerSigningKeys =
-                                await jwksManager.GetSigningKeysAsync();
-                        },
-                        OnAuthenticationFailed = context =>
-                        {
-                            Console.WriteLine($"Authentication failed: {context.Exception}");
-                            return Task.CompletedTask;
-                        }
-                    };
-                }
-            );
+        private static void RolePermissionSetUp(IServiceCollection services)
+        {
+            services.AddAuthorizationBuilder()
+                .AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"))
+                .AddPolicy("EditorPolicy", policy => policy.RequireRole("Editor"))
+                .AddPolicy("UserPolicy", policy => policy.RequireRole("User"))
+                .AddPolicy("CreateContent", policy => policy.RequireClaim("permission", "CreateContent"))
+                .AddPolicy("EditContent", policy => policy.RequireClaim("permission", "EditContent"))
+                .AddPolicy("DeleteContent", policy => policy.RequireClaim("permission", "DeleteContent"))
+                .AddPolicy("ViewContent", policy => policy.RequireClaim("permission", "ViewContent"));
+        }
+
+        private static void InitMQSetting(ConfigurationManager configuration, IServiceCollection services)
+        {
+            // Keep the existing configuration binding
+            services.Configure<QueueSettings>(configuration.GetSection("RabbitMQSettings"));
+            // Register your consumer and publisher
+            services.AddSingleton<IRabbitConnectionManager, RabbitConnectionManager>();
+            services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
+            services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+            //Hosted service listener
+            //services.AddHostedService<RabbitMqConsumerHostedService>();
+            //Nofitication Consumer
+            services.AddHostedService<NotificationConsumerService>();
         }
 
     }

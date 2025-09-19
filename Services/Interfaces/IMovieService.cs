@@ -6,7 +6,7 @@ namespace Firebase_Auth.Services.Interfaces;
 public interface IMovieService
 {
     Task<MovieGetDto> GetMovieByIdAsync(Guid id);
-    Task<PaginationResponse<MovieListDto>> ListMovieAsync(FilterRequest filter);
+    Task<PaginationResponse<MovieListDto>> ListMovieAsync(SimpleFilter filter);
     Task<MovieCreateDto> CreateMovieAsync(MovieCreateDto dto);
     Task<MovieUpdateDto> UpdateMovieAsync(Guid id, MovieUpdateDto dto);
     Task DeleteMovieByIdAsync(Guid id);

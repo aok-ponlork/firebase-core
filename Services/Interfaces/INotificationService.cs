@@ -7,9 +7,9 @@ public interface INotificationService
     Task<CreateUserNotificationDto> CreateNotificationForSpecificUserAsync(CreateUserNotificationDto notification);
     Task<CreateGeneralNotificationDto> CreateGeneralNotificationAsync(CreateGeneralNotificationDto notification);
     Task DeleteNotificationAsync(Guid Id);
-    Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(FilterRequest  notificationFilter);
-    Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(FilterRequest  notificationFilter);
-    Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(FilterRequest  notificationFilter);
+    Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(SimpleFilter  notificationFilter);
+    Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(SimpleFilter  notificationFilter);
+    Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(SimpleFilter  notificationFilter);
     Task<NotificationDto?> FindNotificationByIdAsync(Guid id);
     Task<NotificationDto> UpdateNotificationAsync(NotificationDto notification);
     Task CreateNotificationsForMultipleUsersAsync(CreateUserNotificationDto notification, List<string> userIds);

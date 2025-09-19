@@ -5,14 +5,14 @@ using Firebase_Auth.Helper.Response;
 namespace Firebase_Auth.Services.Authorization.Interfaces;
 public interface IRolePermissionService
 {
-    Task<PaginationResponse<RoleDto>> GetAllRolesAsync(FilterRequest filter);
+    Task<PaginationResponse<RoleDto>> GetAllRolesAsync(SimpleFilter filter);
     Task<RoleDto> GetRoleByIdAsync(Guid id);
     Task<RoleDto> CreateRoleAsync(RoleCreateDto role);
     Task<RoleDto> UpdateRoleAsync(Guid id, string name, string description);
     Task DeleteRoleAsync(Guid id);
     Task PermanentDeleteRoleAsync(List<Guid> Ids);
 
-    Task<PaginationResponse<PermissionDto>> GetAllPermissionsAsync(FilterRequest filter);
+    Task<PaginationResponse<PermissionDto>> GetAllPermissionsAsync(SimpleFilter filter);
     Task<PermissionDto> GetPermissionByIdAsync(Guid id);
     Task<PermissionDto> CreatePermissionAsync(string name, string description, string code);
     Task<PermissionDto> UpdatePermissionAsync(Guid id, string name, string description);

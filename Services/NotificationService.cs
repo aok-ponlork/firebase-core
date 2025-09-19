@@ -1,5 +1,6 @@
 using AutoMapper;
 using Firebase_Auth.Common.Filters;
+using Firebase_Auth.Common.Helpers;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Common.Notification;
@@ -62,13 +63,13 @@ internal sealed class NotificationService : INotificationService
         return notification;
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(FilterRequest  filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationForClientPagination(SimpleFilter  filter)
     {
         var entityQuery = _context.Notifications
             .Where(m => m.State != EfState.Deleted)
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
-        var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
+        var entityResult = await PaginationHelper.CreatePaginatedResponseAsync(entityQuery, filter);
         var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {
@@ -79,13 +80,13 @@ internal sealed class NotificationService : INotificationService
         };
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(FilterRequest filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetGeneralNotificationPagination(SimpleFilter filter)
     {
         var entityQuery = _context.Notifications
             .Where(m => m.State != EfState.Deleted && m.NotificationRecipient == NotificationRecipientType.General)
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
-        var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
+        var entityResult = await PaginationHelper.CreatePaginatedResponseAsync(entityQuery, filter);
         var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {
@@ -105,13 +106,13 @@ internal sealed class NotificationService : INotificationService
         return fcmToken;
     }
 
-    public async Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(FilterRequest  filter)
+    public async Task<PaginationResponse<NotificationListDto>> GetUserNotificationPagination(SimpleFilter  filter)
     {
         var entityQuery = _context.Notifications
            .Where(m => m.State != EfState.Deleted && m.NotificationRecipient == NotificationRecipientType.SpecificUser)
            .OrderByDescending(m => m.CreatedOn)
            .AsNoTracking();
-        var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
+        var entityResult = await PaginationHelper.CreatePaginatedResponseAsync(entityQuery, filter);
         var data = _mapper.Map<List<NotificationListDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationListDto>
         {

@@ -7,5 +7,5 @@ using Firebase_Auth.Services.Interfaces.Base;
 namespace Firebase_Auth.Services.Interfaces;
 public interface INotificationTopicService : IBaseService<CreateNotificationTopicDto, NotificationTopic, NotificationTopicDto>
 { 
-    Task<PaginationResponse<NotificationTopicDto>> List(FilterRequest filter);
+    Task<PaginationResponse<NotificationTopicDto>> List(SimpleFilter filter);
 }

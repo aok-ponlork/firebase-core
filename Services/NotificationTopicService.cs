@@ -1,6 +1,7 @@
 
 using AutoMapper;
 using Firebase_Auth.Common.Filters;
+using Firebase_Auth.Common.Helpers;
 using Firebase_Auth.Context;
 using Firebase_Auth.Data.Constant;
 using Firebase_Auth.Data.Entities.Common.Notification;
@@ -42,13 +43,13 @@ internal sealed class NotificationTopicService : INotificationTopicService
         return _mapper.Map<NotificationTopicDto>(record);
     }
 
-    public async Task<PaginationResponse<NotificationTopicDto>> List(FilterRequest filter)
+    public async Task<PaginationResponse<NotificationTopicDto>> List(SimpleFilter filter)
     {
         var entityQuery = _context.Topics
             .Where(m => m.State != EfState.Deleted)
             .OrderByDescending(m => m.CreatedOn)
             .AsNoTracking();
-        var entityResult = await PaginationHelper.CreatePaginatedResponse(entityQuery, filter);
+        var entityResult = await PaginationHelper.CreatePaginatedResponseAsync(entityQuery, filter);
         var data = _mapper.Map<List<NotificationTopicDto>>(entityResult.Datasource);
         return new PaginationResponse<NotificationTopicDto>
         {

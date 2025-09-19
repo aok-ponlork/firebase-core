@@ -19,13 +19,13 @@ public class NotificationHelper
             {
                 Token = model.DeviceToken,
                 Data = new Dictionary<string, string>
-            {
-                { "title", model.Title },
-                { "message", model.Message },
-                { "destination", model.Destination ?? "" },
-                { "notificationRecipient", model.RecipientType.ToString() },
-                { "imageUrl", model.ImageUrl ?? "" }
-            },
+                {
+                    { "title", model.Title },
+                    { "message", model.Message },
+                    { "destination", model.Destination ?? "" },
+                    { "notificationRecipient", model.RecipientType.ToString() },
+                    { "imageUrl", model.ImageUrl ?? "" }
+                },
                 Notification = new Notification
                 {
                     Title = model.Title,

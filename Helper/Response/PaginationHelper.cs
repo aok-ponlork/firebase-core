@@ -1,49 +1,94 @@
+using Firebase_Auth.Common.Extensions;
 using Firebase_Auth.Common.Filters;
+using Firebase_Auth.Helper.Response;
 using Microsoft.EntityFrameworkCore;
 
-namespace Firebase_Auth.Helper.Response;
+namespace Firebase_Auth.Common.Helpers;
 
 public static class PaginationHelper
 {
-    public static async Task<PaginationResponse<T>> CreatePaginatedResponse<T>(IQueryable<T> query, FilterRequest filter) where T : class
+
+    //pagination with Dynamic filter
+    public static async Task<PaginationResponse<T>> CreatePaginatedResponseWithDynamicFilterAsync<T>(
+        IQueryable<T> query,
+        FilterRequest filterRequest,
+        params string[] searchableFields) where T : class
     {
-        var combinedFilter = BuildNestedFilter(filter.Filters);
+        // Apply search if specified
+        if (!string.IsNullOrWhiteSpace(filterRequest.Search))
+        {
+            query = query.ApplySearch(filterRequest.Search, searchableFields);
+        }
+
+        // Apply filters
+        var combinedFilter = BuildCombinedFilter(filterRequest.Filters);
         query = query.ApplyFilters(combinedFilter);
 
-        // sorting
-        query = query.ApplySort(filter.SortBy ?? "", filter.SortDirection);
+        // Apply sorting with fallback to Id
+        query = query.ApplySort(filterRequest.SortBy ?? "Id", filterRequest.SortDirection);
 
+        // Get total count before pagination
         var totalRecords = await query.CountAsync();
 
-        // pagination
+        // Apply pagination
         var data = await query
-            .Skip((filter.PageIndex - 1) * filter.PageSize)
-            .Take(filter.PageSize)
+            .Skip((filterRequest.PageIndex - 1) * filterRequest.PageSize)
+            .Take(filterRequest.PageSize)
             .ToListAsync();
 
         return new PaginationResponse<T>
         {
-            PageNumber = filter.PageIndex,
-            PageSize = filter.PageSize,
+            PageNumber = filterRequest.PageIndex,
+            PageSize = filterRequest.PageSize,
             TotalRecords = totalRecords,
             Datasource = data
         };
     }
-    static DynamicFilter BuildNestedFilter(List<DynamicFilter> filters)
+
+    public static async Task<PaginationResponse<T>> CreatePaginatedResponseAsync<T>(
+           IQueryable<T> query,
+           SimpleFilter filterRequest,
+           params string[] searchableFields) where T : class
+    {
+        // Apply search if specified
+        if (!string.IsNullOrWhiteSpace(filterRequest.Search))
+        {
+            query = query.ApplySearch(filterRequest.Search, searchableFields);
+        }
+
+        // Apply sorting with fallback to Id
+        query = query.ApplySort(filterRequest.SortBy ?? "Id", filterRequest.SortDirection);
+
+        // Get total count before pagination
+        var totalRecords = await query.CountAsync();
+
+        // Apply pagination
+        var data = await query
+            .Skip((filterRequest.PageIndex - 1) * filterRequest.PageSize)
+            .Take(filterRequest.PageSize)
+            .ToListAsync();
+
+        return new PaginationResponse<T>
+        {
+            PageNumber = filterRequest.PageIndex,
+            PageSize = filterRequest.PageSize,
+            TotalRecords = totalRecords,
+            Datasource = data
+        };
+    }
+
+    private static DynamicFilter? BuildCombinedFilter(List<DynamicFilter> filters)
     {
         if (filters == null || filters.Count == 0)
-            return new DynamicFilter { Logic = "AND", Filters = new List<DynamicFilter>() };
-        // Start from the last filter
-        DynamicFilter nestedFilter = filters.Last();
-        // Walk backward, nesting each previous filter with the next, using that filter's logic or default AND
-        for (int i = filters.Count - 2; i >= 0; i--)
+            return null;
+
+        if (filters.Count == 1)
+            return filters[0];
+
+        return new DynamicFilter
         {
-            nestedFilter = new DynamicFilter
-            {
-                Logic = filters[i].Logic?.ToUpper() ?? "AND",
-                Filters = new List<DynamicFilter> { filters[i], nestedFilter }
-            };
-        }
-        return nestedFilter;
+            Logic = "AND",
+            Filters = filters
+        };
     }
 }

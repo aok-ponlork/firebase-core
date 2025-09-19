@@ -33,6 +33,7 @@ public class CreateUserNotificationDto : BaseNotificationDto
         UserId = userId;
         RecipientType = recipientType;
     }
+     public CreateUserNotificationDto() { }
 }
 
 //dto for user notification req

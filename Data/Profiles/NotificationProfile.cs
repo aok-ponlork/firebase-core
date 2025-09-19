@@ -14,7 +14,7 @@ public class NotificationProfile : Profile
 
         // From DTO to entity (for creating and updating)
         CreateMap<NotificationDto, Notification>();
-        CreateMap<CreateUserNotificationDto, Notification>();
+        CreateMap<CreateUserNotificationDto, Notification>().ReverseMap();
         CreateMap<CreateGeneralNotificationDto, Notification>();
     }
 }

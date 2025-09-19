@@ -3,9 +3,11 @@ using Firebase_Auth.Data.Models.Authentication.DTO;
 using Firebase_Auth.Engine.Jwt;
 using Firebase_Auth.Helper.Firebase.FCM;
 using Firebase_Auth.Infrastructure.Jobs;
+using Firebase_Auth.Infrastructure.Jobs.Redis;
 using Firebase_Auth.Infrastructure.MessageQueue;
 using Firebase_Auth.Infrastructure.MessageQueue.Interface;
 using Firebase_Auth.Infrastructure.MessageQueue.Settings;
+using Firebase_Auth.Infrastructure.Persistence.Redis.Settings;
 using Firebase_Auth.Infrastructure.Security;
 using Firebase_Auth.Services;
 using Firebase_Auth.Services.Authentication;
@@ -18,6 +20,7 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using StackExchange.Redis;
 
 
 namespace Firebase_Auth.Engine
@@ -36,6 +39,7 @@ namespace Firebase_Auth.Engine
             RolePermissionSetUp(services);
             RegisterFirebaseService(services, configuration);
             InitMQSetting(configuration, services);
+            RegisterRedisInstance(services, configuration);
         }
         //Database configuration method
         private static void ConfigureDatabase(IServiceCollection services, ConfigurationManager configuration)
@@ -130,15 +134,37 @@ namespace Firebase_Auth.Engine
         private static void InitMQSetting(ConfigurationManager configuration, IServiceCollection services)
         {
             // Keep the existing configuration binding
-            services.Configure<QueueSettings>(configuration.GetSection("RabbitMQSettings"));
+            // services.Configure<QueueSettings>(configuration.GetSection("RabbitMQSettings"));
             // Register your consumer and publisher
-            services.AddSingleton<IRabbitConnectionManager, RabbitConnectionManager>();
-            services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
-            services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+            // services.AddSingleton<IRabbitConnectionManager, RabbitConnectionManager>();
+            // services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
+            // services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
             //Hosted service listener
             //services.AddHostedService<RabbitMqConsumerHostedService>();
             //Nofitication Consumer
-            services.AddHostedService<NotificationConsumerService>();
+            // services.AddHostedService<NotificationConsumerService>();
+        }
+        private static void RegisterRedisInstance(IServiceCollection services, ConfigurationManager configuration)
+        {
+            var redisSettings = configuration.GetSection("RedisSettings").Get<RedisSettings>();
+            var options = ConfigurationOptions.Parse(redisSettings!.ConnectionString);
+            options.DefaultDatabase = redisSettings.Database;
+            options.ConnectTimeout = redisSettings.ConnectTimeout;
+            options.SyncTimeout = redisSettings.SyncTimeout;
+            options.AbortOnConnectFail = redisSettings.AbortOnConnectFail;
+            //create connection.
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options));
+            var role = Environment.GetEnvironmentVariable("ROLE");
+            if (role == "publisher")
+            {
+                services.AddHostedService<RedisPublisherService>();
+
+            }
+            else if (role == "subscriber")
+            {
+                services.AddHostedService<RedisSubscriberService>();
+            }
+
         }
 
     }

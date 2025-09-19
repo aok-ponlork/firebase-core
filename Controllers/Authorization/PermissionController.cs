@@ -16,7 +16,7 @@ public class PermissionController : CoreController
     }
     [Authorize(Roles = RoleNames.Admin)]
     [HttpGet]
-    public async Task<IActionResult> ListAllRoleAsync([FromQuery] FilterRequest filter)
+    public async Task<IActionResult> ListAllRoleAsync([FromQuery] SimpleFilter filter)
     {
         var result = await _service.GetAllPermissionsAsync(filter);
         return ToSuccess("Listed Permission.", result);

@@ -3,7 +3,6 @@ using Firebase_Auth.Data.Models.Movies;
 using Firebase_Auth.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Firebase_Auth.Controllers.Movies;
 
@@ -18,13 +17,11 @@ public class MovieController : CoreController
     }
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> ListMovieAsync([FromQuery] FilterRequest filter)
+    public async Task<IActionResult> ListMovieAsync([FromQuery] SimpleFilter filter)
     {
 
         try
         {
-            Console.WriteLine($"Filters count: {filter.Filters?.Count ?? 0}");
-            Console.WriteLine($"Filters JSON: {JsonConvert.SerializeObject(filter.Filters)}");
             var movies = await _movieService.ListMovieAsync(filter);
             return ToSuccess("Success get movies list!", movies);
         }

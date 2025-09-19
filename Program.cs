@@ -22,6 +22,15 @@ Log.Logger = new LoggerConfiguration()
 // Now create the WebApplication builder
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    var port = Environment.GetEnvironmentVariable("API_PORT");
+    if (!string.IsNullOrEmpty(port))
+    {
+        options.ListenAnyIP(int.Parse(port));
+    }   
+});
+
 // Configure services
 ConfigureServices(builder);
 
@@ -34,11 +43,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 ConfigurePipeline(app);
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await Starter.SeedRoodUser(services);
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     await Starter.SeedRoodUser(services);
+// }
 
 app.Run();
 static void ConfigureServices(WebApplicationBuilder builder)
@@ -61,7 +70,7 @@ static void ConfigureServices(WebApplicationBuilder builder)
     {
         options.AddPolicy("Default", policy =>
         {
-            policy.WithOrigins("http://localhost:4200") 
+            policy.WithOrigins("http://localhost:4200")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials(); // Required to send cookies

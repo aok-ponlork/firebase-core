@@ -32,7 +32,7 @@ public class NotificationTopicController : CoreController
         }
     }
     [HttpGet]
-    public async Task<IActionResult> ListAsync([FromQuery] FilterRequest filter)
+    public async Task<IActionResult> ListAsync([FromQuery] SimpleFilter filter)
     {
         try
         {

@@ -19,7 +19,7 @@ public class NotificationController : CoreController
     }
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> ListGeneralNotificationAsync([FromQuery] FilterRequest filter)
+    public async Task<IActionResult> ListGeneralNotificationAsync([FromQuery] SimpleFilter filter)
     {
         try
         {

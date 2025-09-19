@@ -16,7 +16,7 @@ public class RoleController : CoreController
         _service = service;
     }
     [HttpGet]
-    public async Task<IActionResult> ListAllRoleAsync([FromQuery] FilterRequest filter)
+    public async Task<IActionResult> ListAllRoleAsync([FromQuery] SimpleFilter filter)
     {
         var result = await _service.GetAllRolesAsync(filter);
         return ToSuccess("Listed Roles.", result);
